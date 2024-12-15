@@ -24,7 +24,6 @@
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.16.0",
     "@tsconfig/node18": "^1.0.1",
-    "@types/express": "^4.17.16",
     "@types/klaw": "^3.0.3",
     "@types/node": "^22.10.1",
     "@typescript-eslint/eslint-plugin": "^5.61.0",
@@ -43,9 +42,7 @@
     "chalk": "^4.1.2",
     "discord.js": "^14.14.1",
     "dotenv": "^16.0.3",
-    "express": "^4.18.2",
     "klaw": "^4.1.0",
-    "mongodb": "^5.0.0",
-    "rimraf": "^4.1.2"
+    "mongodb": "^5.0.0"
   }
 }

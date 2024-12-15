@@ -5,11 +5,15 @@ import path from 'path';
 
 import type Main from '../main/main';
 import type BaseCommand from './commands/base.command';
+import {Snowflake} from "discord-api-types/globals";
+import {UserBalances} from "../main/util/types";
 
 export default class EconomyBot extends Client {
 
     main: Main;
     commands: Collection<string, BaseCommand> = new Collection();
+
+    serverCache: Record<Snowflake, UserBalances> = {};
 
     constructor(main: Main, options: ClientOptions) {
         super(options);

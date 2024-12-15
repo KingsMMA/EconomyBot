@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import type { InteractionResponse, Message } from 'discord.js';
+import {InteractionResponse, Message, PermissionResolvable} from 'discord.js';
 import { ButtonInteraction } from 'discord.js';
 import { CommandInteraction } from 'discord.js';
 
@@ -11,6 +11,8 @@ declare module 'discord.js' {
     interface CommandInteraction {
         replySuccess(message: string, ephemeral?: boolean): Promise<Message | InteractionResponse>;
         replyError(message: string, ephemeral?: boolean): Promise<Message | InteractionResponse>;
+
+        permCheck(permission: PermissionResolvable): boolean;
     }
     interface ButtonInteraction {
         replySuccess(message: string, ephemeral?: boolean): Promise<Message | InteractionResponse>;
@@ -83,6 +85,12 @@ CommandInteraction.prototype.replyError = ButtonInteraction.prototype.replyError
             ],
         });
 };
+
+CommandInteraction.prototype.permCheck = function (permission: PermissionResolvable) {
+    if (this.member.permissions.has(permission, true)) return true;
+    void this.replyError(`You do not have the required permissions to run this command.`);
+    return false;
+}
 
 String.prototype.parseDuration = function(): number {
     const regex = /(?:(\d+)d)? ?(?:(\d+)h)? ?(?:(\d+)m)? ?(?:(\d+)s)?/g;

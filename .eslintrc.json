@@ -33,8 +33,7 @@
         "lines-between-class-members": ["error", {
             "enforce": [
                 { "blankLine": "always", "prev": "method", "next": "*" },
-                { "blankLine": "always", "prev": "*", "next": "method" },
-                { "blankLine": "never", "prev": "field", "next": "field" }
+                { "blankLine": "always", "prev": "*", "next": "method" }
             ]
         }],
         "padded-blocks": ["error", {

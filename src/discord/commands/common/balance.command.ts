@@ -28,12 +28,13 @@ export default class BalanceCommand extends BaseCommand {
         if (interaction.user.id !== user.id && interaction.permCheck(PermissionFlagsBits.ManageGuild, 'You do not have the required permissions to check another user\'s balance.')) return;
 
         const balance = this.client.getBalance(interaction.guildId!, user.id);
-        const embed = new KingsDevEmbedBuilder()
-            .setTitle(`Balance for ${user.username}`)
-            .setDescription(`Balance: ${balance.formatNumber()}`)
-            .setColor('DarkAqua')
-            .setTimestamp();
-        await interaction.reply({embeds: [embed]});
+        await interaction.reply({ embeds: [
+            new KingsDevEmbedBuilder()
+                .setTitle(`Balance for ${user.username}`)
+                .setDescription(`Balance: ${balance.formatNumber()}`)
+                .setColor('DarkAqua')
+                .setTimestamp()
+        ] });
     }
 
 }

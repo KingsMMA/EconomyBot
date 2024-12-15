@@ -24,11 +24,15 @@ export default class LeaderboardCommand extends BaseCommand {
             return interaction.replyError('No users have a balance yet.');
         }
 
-        const embed = new KingsDevEmbedBuilder()
-            .setTitle('Top 10 Users')
-            .setDescription(balances.map(([userId, balance], i) => `**${i + 1}.** <@${userId}> - ${balance.formatNumber()}`).join('\n'))
-            .setColor('DarkAqua')
-        await interaction.reply({embeds: [embed]});
+        await interaction.reply({ embeds: [
+            new KingsDevEmbedBuilder()
+                .setTitle('Top 10 Users')
+                .setDescription(balances.map(([
+                    userId, balance
+                ], i) => `**${i + 1}.** <@${userId}> - ${balance.formatNumber()}`)
+                    .join('\n'))
+                .setColor('DarkAqua')
+        ] });
     }
 
 }

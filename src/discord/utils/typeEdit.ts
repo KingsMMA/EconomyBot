@@ -5,19 +5,28 @@ import {
     InteractionResponse,
     Message,
     MessageCreateOptions,
-    MessagePayload,
-    PermissionResolvable
+    MessagePayload, ModalBuilder, ModalSubmitInteraction,
+    PermissionResolvable, TextInputBuilder
 } from 'discord.js';
 import { ButtonInteraction } from 'discord.js';
 import { CommandInteraction } from 'discord.js';
 
 import KingsDevEmbedBuilder from './kingsDevEmbedBuilder';
 import {ButtonStyle, ComponentType} from "discord-api-types/v10";
+import {randomUUID} from "node:crypto";
 
 const loggerInitialisedMessage = 'Logger initialised';
 
 declare module 'discord.js' {
     interface CommandInteraction {
+        /**
+         * Shows a modal to the user and returns the strings they inputted.
+         * @param title The total of the modal
+         * @param inputs The inputs to show in the modal
+         * @returns The interaction and the strings the user inputted.
+         */
+        getStringFromModal(title: string, inputs: TextInputBuilder[]): Promise<[ModalSubmitInteraction | null, Record<string, string> | null]>;
+
         safeReply(options: string | MessagePayload | InteractionReplyOptions): Promise<Message | InteractionResponse>;
         replySuccess(message: string, ephemeral?: boolean): Promise<Message | InteractionResponse>;
         replyError(message: string, ephemeral?: boolean): Promise<Message | InteractionResponse>;
@@ -32,6 +41,20 @@ declare module 'discord.js' {
         permCheck(permission: PermissionResolvable, error?: string): boolean;
     }
     interface ButtonInteraction {
+        /**
+         * Shows a modal to the user and returns the strings they inputted.
+         * @param title The total of the modal
+         * @param inputs The inputs to show in the modal
+         * @returns The interaction and the strings the user inputted.
+         */
+        getStringFromModal(title: string, inputs: TextInputBuilder[]): Promise<[ModalSubmitInteraction | null, Record<string, string> | null]>;
+
+        safeReply(options: string | MessagePayload | InteractionReplyOptions): Promise<Message | InteractionResponse>;
+        replySuccess(message: string, ephemeral?: boolean): Promise<Message | InteractionResponse>;
+        replyError(message: string, ephemeral?: boolean): Promise<Message | InteractionResponse>;
+        replyConfirmation(message: string, ephemeral?: boolean): Promise<boolean>;
+    }
+    interface ModalSubmitInteraction {
         safeReply(options: string | MessagePayload | InteractionReplyOptions): Promise<Message | InteractionResponse>;
         replySuccess(message: string, ephemeral?: boolean): Promise<Message | InteractionResponse>;
         replyError(message: string, ephemeral?: boolean): Promise<Message | InteractionResponse>;
@@ -66,14 +89,30 @@ declare global {
     }
 }
 
-CommandInteraction.prototype.safeReply = ButtonInteraction.prototype.safeReply = async function (options: string | MessagePayload | InteractionReplyOptions) {
+CommandInteraction.prototype.getStringFromModal = ButtonInteraction.prototype.getStringFromModal = async function (title, inputs): Promise<[ModalSubmitInteraction | null, Record<string, string> | null]> {
+        const id = randomUUID();
+        await this.showModal(new ModalBuilder()
+            .setTitle(title)
+            .setCustomId(id)
+            .addComponents(
+                ...inputs.map(input => new ActionRowBuilder<TextInputBuilder>().addComponents(input))
+            ));
+        const response = await this.awaitModalSubmit({
+            time: 120000,
+            filter: i => i.user.id === this.user.id && i.customId === id,
+        }).catch(() => null);
+        if (!response) return [null, null];
+        return [response, Object.fromEntries(response.components.map(row => [row.components[0].customId, row.components[0].value]))];
+    }
+
+CommandInteraction.prototype.safeReply = ButtonInteraction.prototype.safeReply = ModalSubmitInteraction.prototype.safeReply = async function (options: string | MessagePayload | InteractionReplyOptions) {
     if (this.replied || !this.isRepliable() || this.deferred)
         return this.editReply(options);
     else
         return this.reply(options);
 }
 
-CommandInteraction.prototype.replySuccess = ButtonInteraction.prototype.replySuccess = async function (message: string, ephemeral?: boolean) {
+CommandInteraction.prototype.replySuccess = ButtonInteraction.prototype.replySuccess = ModalSubmitInteraction.prototype.replySuccess = async function (message: string, ephemeral?: boolean) {
     return this.safeReply({
             ephemeral: ephemeral,
             embeds: [
@@ -85,7 +124,7 @@ CommandInteraction.prototype.replySuccess = ButtonInteraction.prototype.replySuc
         });
 };
 
-CommandInteraction.prototype.replyError = ButtonInteraction.prototype.replyError = async function (message: string, ephemeral?: boolean) {
+CommandInteraction.prototype.replyError = ButtonInteraction.prototype.replyError = ModalSubmitInteraction.prototype.replyError = async function (message: string, ephemeral?: boolean) {
     return this.safeReply({
         ephemeral: ephemeral,
         embeds: [
@@ -97,9 +136,10 @@ CommandInteraction.prototype.replyError = ButtonInteraction.prototype.replyError
     });
 };
 
-CommandInteraction.prototype.replyConfirmation = ButtonInteraction.prototype.replyConfirmation = async function (message: string, ephemeral?: boolean): Promise<boolean> {
+CommandInteraction.prototype.replyConfirmation = ButtonInteraction.prototype.replyConfirmation = ModalSubmitInteraction.prototype.replyConfirmation = async function (message: string, ephemeral?: boolean): Promise<boolean> {
     return new Promise<boolean>(async (resolve, reject) => {
-        let repsonse = await this.safeReply({
+        if (!(this.replied || !this.isRepliable() || this.deferred)) await this.deferReply();
+        let response = await this.followUp({
             ephemeral: ephemeral,
             embeds: [
                 new KingsDevEmbedBuilder()
@@ -122,7 +162,7 @@ CommandInteraction.prototype.replyConfirmation = ButtonInteraction.prototype.rep
             ]
         });
 
-        let buttonInt = await repsonse.awaitMessageComponent({
+        let buttonInt = await response.awaitMessageComponent({
             componentType: ComponentType.Button,
             time: 60000,
             filter: i => i.user.id === this.user.id &&

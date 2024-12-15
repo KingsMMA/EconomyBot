@@ -21,7 +21,7 @@ export default class Main {
             path: __dirname + path.sep + '..' + path.sep + '..' + path.sep + '.env',
         });
 
-        for (const required_key of ['BOT_ID', 'BOT_TOKEN', 'MONGO_URI', 'AUTOSAVE_INTERVAL', 'INITIAL_BALANCE', 'MESSAGE_REWARD_FORMULA', 'DAILY_MIN', 'DAILY_MAX']) {
+        for (const required_key of ['BOT_ID', 'BOT_TOKEN', 'MONGO_URI', 'CONFIRMATION_CODE', 'AUTOSAVE_INTERVAL', 'INITIAL_BALANCE', 'MESSAGE_REWARD_FORMULA', 'DAILY_MIN', 'DAILY_MAX']) {
             if (!process.env[required_key]) {
                 throw new Error(`Missing required environment variable: ${required_key}`);
             }

@@ -12,7 +12,13 @@ declare module 'discord.js' {
         replySuccess(message: string, ephemeral?: boolean): Promise<Message | InteractionResponse>;
         replyError(message: string, ephemeral?: boolean): Promise<Message | InteractionResponse>;
 
-        permCheck(permission: PermissionResolvable): boolean;
+        /**
+         * Checks if the user has the required permissions to run the command (or admin).
+         * @param permission The permission to check for.
+         * @param error The error message to send if the user does not have the required permissions.
+         * @returns Whether the command should stop execution.
+         */
+        permCheck(permission: PermissionResolvable, error?: string): boolean;
     }
     interface ButtonInteraction {
         replySuccess(message: string, ephemeral?: boolean): Promise<Message | InteractionResponse>;
@@ -33,6 +39,11 @@ declare global {
          * Converts a number to ``W days, X hours, Y minutes, Z seconds`` format.
          */
         formatTime(): string;
+
+        /**
+         * Formats a number to have commas every 3 digits.
+         */
+        formatNumber(): string;
     }
     interface Date {
         /**
@@ -86,10 +97,10 @@ CommandInteraction.prototype.replyError = ButtonInteraction.prototype.replyError
         });
 };
 
-CommandInteraction.prototype.permCheck = function (permission: PermissionResolvable) {
-    if (this.member.permissions.has(permission, true)) return true;
-    void this.replyError('You do not have the required permissions to run this command.');
-    return false;
+CommandInteraction.prototype.permCheck = function (permission: PermissionResolvable, error?: string) {
+    if (this.member.permissions.has(permission, true)) return false;
+    void this.replyError(error ?? 'You do not have the required permissions to run this command.');
+    return true;
 };
 
 String.prototype.parseDuration = function(): number {
@@ -126,6 +137,10 @@ Number.prototype.formatTime = function () {
                 components.length === 3 ?
                     `${components[0]}, ${components[1]}, and ${components[2]}` :
                     `${components[0]}, ${components[1]}, ${components[2]}, and ${components[3]}`;
+};
+
+Number.prototype.formatNumber = function () {
+    return this.toLocaleString('en-US');
 };
 
 Date.prototype.toDiscord = function (format) {

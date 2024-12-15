@@ -40,4 +40,8 @@ export default class EconomyBot extends Client {
         }
     }
 
+    getBalance(guildId: Snowflake, userId: Snowflake): number {
+        return (this.serverCache[guildId] ?? {})[userId] ?? Number(process.env.INITIAL_BALANCE);
+    }
+
 }

@@ -1,12 +1,12 @@
 import type { ClientOptions } from 'discord.js';
 import { Client, Collection } from 'discord.js';
+import type { Snowflake } from 'discord-api-types/globals';
 import type { PathLike } from 'fs';
 import path from 'path';
 
 import type Main from '../main/main';
+import type { ServerData } from '../main/util/types';
 import type BaseCommand from './commands/base.command';
-import {Snowflake} from "discord-api-types/globals";
-import {ServerData, UserBalances} from "../main/util/types";
 
 export default class EconomyBot extends Client {
 

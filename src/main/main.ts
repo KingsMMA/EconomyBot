@@ -21,14 +21,18 @@ export default class Main {
             path: __dirname + path.sep + '..' + path.sep + '..' + path.sep + '.env',
         });
 
-        for (const required_key of ['BOT_ID', 'BOT_TOKEN', 'MONGO_URI', 'CONFIRMATION_CODE', 'AUTOSAVE_INTERVAL', 'INITIAL_BALANCE', 'MESSAGE_REWARD_FORMULA', 'DAILY_MIN', 'DAILY_MAX']) {
+        for (const required_key of [
+            'BOT_ID', 'BOT_TOKEN', 'MONGO_URI', 'CONFIRMATION_CODE', 'AUTOSAVE_INTERVAL', 'INITIAL_BALANCE', 'MESSAGE_REWARD_FORMULA', 'DAILY_MIN', 'DAILY_MAX'
+        ]) {
             if (!process.env[required_key]) {
                 throw new Error(`Missing required environment variable: ${required_key}`);
             }
         }
 
-        for (const required_number of ['AUTOSAVE_INTERVAL', 'INITIAL_BALANCE', 'DAILY_MIN', 'DAILY_MAX']) {
-            let envNumber = Number(process.env[required_number]);
+        for (const required_number of [
+            'AUTOSAVE_INTERVAL', 'INITIAL_BALANCE', 'DAILY_MIN', 'DAILY_MAX'
+        ]) {
+            const envNumber = Number(process.env[required_number]);
             if (isNaN(envNumber)) {
                 throw new Error(`Environment variable ${required_number} must be a number`);
             } else if (!Number.isInteger(envNumber)) {
@@ -42,8 +46,8 @@ export default class Main {
             throw new Error('AUTOSAVE_INTERVAL must be at least 3 seconds');
         }
 
-        let dailyMin = Number(process.env.DAILY_MIN);
-        let dailyMax = Number(process.env.DAILY_MAX);
+        const dailyMin = Number(process.env.DAILY_MIN);
+        const dailyMax = Number(process.env.DAILY_MAX);
         if (dailyMin > dailyMax) {
             throw new Error('DAILY_MIN must be less than or equal to DAILY_MAX');
         }

@@ -1,4 +1,4 @@
-import type { GuildTextBasedChannel, Message } from 'discord.js';
+import type { Message } from 'discord.js';
 
 import type EconomyBot from '../economyBot';
 

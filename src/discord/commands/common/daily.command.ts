@@ -1,12 +1,12 @@
-import type {AutocompleteInteraction, ChatInputCommandInteraction} from 'discord.js';
-import {PermissionsBitField} from 'discord.js';
-import {ApplicationCommandOptionType, ApplicationCommandType} from 'discord-api-types/v10';
+import type { ChatInputCommandInteraction } from 'discord.js';
+import { ApplicationCommandType } from 'discord-api-types/v10';
 
 import type EconomyBot from '../../economyBot';
 import KingsDevEmbedBuilder from '../../utils/kingsDevEmbedBuilder';
 import BaseCommand from '../base.command';
 
 export default class DailyCommand extends BaseCommand {
+
     constructor(client: EconomyBot) {
         super(client, {
             name: 'daily',

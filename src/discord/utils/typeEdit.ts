@@ -1,19 +1,21 @@
+import { randomUUID } from 'node:crypto';
+
 import chalk from 'chalk';
-import {
-    ActionRowBuilder, ButtonBuilder,
+import type {
     InteractionReplyOptions,
     InteractionResponse,
     Message,
-    MessageCreateOptions,
-    MessagePayload, ModalBuilder, ModalSubmitInteraction,
+    MessagePayload,
     PermissionResolvable, TextInputBuilder
+} from 'discord.js';
+import {
+    ActionRowBuilder, ButtonBuilder, ModalBuilder, ModalSubmitInteraction
 } from 'discord.js';
 import { ButtonInteraction } from 'discord.js';
 import { CommandInteraction } from 'discord.js';
+import { ButtonStyle, ComponentType } from 'discord-api-types/v10';
 
 import KingsDevEmbedBuilder from './kingsDevEmbedBuilder';
-import {ButtonStyle, ComponentType} from "discord-api-types/v10";
-import {randomUUID} from "node:crypto";
 
 const loggerInitialisedMessage = 'Logger initialised';
 
@@ -90,38 +92,46 @@ declare global {
 }
 
 CommandInteraction.prototype.getStringFromModal = ButtonInteraction.prototype.getStringFromModal = async function (title, inputs): Promise<[ModalSubmitInteraction | null, Record<string, string> | null]> {
-        const id = randomUUID();
-        await this.showModal(new ModalBuilder()
-            .setTitle(title)
-            .setCustomId(id)
-            .addComponents(
-                ...inputs.map(input => new ActionRowBuilder<TextInputBuilder>().addComponents(input))
-            ));
-        const response = await this.awaitModalSubmit({
-            time: 120000,
-            filter: i => i.user.id === this.user.id && i.customId === id,
-        }).catch(() => null);
-        if (!response) return [null, null];
-        return [response, Object.fromEntries(response.components.map(row => [row.components[0].customId, row.components[0].value]))];
-    }
+    const id = randomUUID();
+    await this.showModal(new ModalBuilder()
+        .setTitle(title)
+        .setCustomId(id)
+        .addComponents(
+            ...inputs.map(input => new ActionRowBuilder<TextInputBuilder>()
+                .addComponents(input))
+        ));
+    const response = await this.awaitModalSubmit({
+        time: 120000,
+        filter: i => i.user.id === this.user.id && i.customId === id,
+    })
+        .catch(() => null);
+    if (!response) return [
+        null, null
+    ];
+    return [
+        response, Object.fromEntries(response.components.map(row => [
+            row.components[0].customId, row.components[0].value
+        ]))
+    ];
+};
 
 CommandInteraction.prototype.safeReply = ButtonInteraction.prototype.safeReply = ModalSubmitInteraction.prototype.safeReply = async function (options: string | MessagePayload | InteractionReplyOptions) {
     if (this.replied || !this.isRepliable() || this.deferred)
         return this.editReply(options);
     else
         return this.reply(options);
-}
+};
 
 CommandInteraction.prototype.replySuccess = ButtonInteraction.prototype.replySuccess = ModalSubmitInteraction.prototype.replySuccess = async function (message: string, ephemeral?: boolean) {
     return this.safeReply({
-            ephemeral: ephemeral,
-            embeds: [
-                new KingsDevEmbedBuilder()
-                    .setColor('Green')
-                    .setTitle('Success')
-                    .setDescription(message)
-            ],
-        });
+        ephemeral: ephemeral,
+        embeds: [
+            new KingsDevEmbedBuilder()
+                .setColor('Green')
+                .setTitle('Success')
+                .setDescription(message)
+        ],
+    });
 };
 
 CommandInteraction.prototype.replyError = ButtonInteraction.prototype.replyError = ModalSubmitInteraction.prototype.replyError = async function (message: string, ephemeral?: boolean) {
@@ -139,7 +149,7 @@ CommandInteraction.prototype.replyError = ButtonInteraction.prototype.replyError
 CommandInteraction.prototype.replyConfirmation = ButtonInteraction.prototype.replyConfirmation = ModalSubmitInteraction.prototype.replyConfirmation = async function (message: string, ephemeral?: boolean): Promise<boolean> {
     return new Promise<boolean>(async (resolve, reject) => {
         if (!(this.replied || !this.isRepliable() || this.deferred)) await this.deferReply();
-        let response = await this.followUp({
+        const response = await this.followUp({
             ephemeral: ephemeral,
             embeds: [
                 new KingsDevEmbedBuilder()
@@ -162,7 +172,7 @@ CommandInteraction.prototype.replyConfirmation = ButtonInteraction.prototype.rep
             ]
         });
 
-        let buttonInt = await response.awaitMessageComponent({
+        const buttonInt = await response.awaitMessageComponent({
             componentType: ComponentType.Button,
             time: 60000,
             filter: i => i.user.id === this.user.id &&
@@ -208,7 +218,7 @@ CommandInteraction.prototype.replyConfirmation = ButtonInteraction.prototype.rep
             resolve(false);
         }
     });
-}
+};
 
 CommandInteraction.prototype.permCheck = function (permission: PermissionResolvable, error?: string) {
     if (this.member.permissions.has(permission, true)) return false;

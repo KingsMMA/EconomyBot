@@ -3,7 +3,7 @@ import type { Db } from 'mongodb';
 import { MongoClient } from 'mongodb';
 
 import type Main from '../main';
-import type {ServerData, UserBalances} from './types';
+import type { ServerData } from './types';
 
 export default class Mongo {
 
@@ -32,7 +32,7 @@ export default class Mongo {
                 .collection('servers')
                 .find()
                 .toArray())
-                .map((data) => [
+                .map(data => [
                     data.guildId, data
                 ]));
     }

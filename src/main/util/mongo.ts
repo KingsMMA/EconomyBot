@@ -22,18 +22,8 @@ export default class Mongo {
         console.info(`Fetching user balances for ${this.main.client.guilds.cache.size} saved guilds...`);
         this.main.client.serverCache = await this.fetchAllUserBalances();
         console.info('Finished fetching user balances.');
-    }
 
-    async fetchUserBalances(guildId: Snowflake): Promise<ServerData> {
-        return await this.mongo
-            .collection('balances')
-            .findOne({ guildId }) as ServerData | null ?? { guildId, userBalances: {} };
-    }
-
-    async saveUserBalances(data: ServerData) {
-        await this.mongo
-            .collection('balances')
-            .updateOne({ guildId: data.guildId }, { $set: data }, { upsert: true });
+        setInterval(() => this.saveAllUserBalances(this.main.client.serverCache), 1000 * Number(process.env.AUTOSAVE_INTERVAL));
     }
 
     async fetchAllUserBalances(): Promise<Record<Snowflake, UserBalances>> {
@@ -45,6 +35,16 @@ export default class Mongo {
                 .map(({ guildId, userBalances }) => [
                     guildId, userBalances
                 ]));
+    }
+
+    async saveAllUserBalances(data: Record<Snowflake, UserBalances>) {
+        await Promise.all(
+            Object.entries(data)
+                .map(([
+                    guildId, userBalances
+                ]) => this.mongo
+                    .collection('balances')
+                    .updateOne({ guildId }, { $set: { userBalances } }, { upsert: true })));
     }
 
 }

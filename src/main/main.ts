@@ -1,11 +1,9 @@
 import * as dotenv from 'dotenv';
-import * as fs from 'fs';
 import * as path from 'path';
 
 import type EconomyBot from '../discord/economyBot';
 import { init } from '../discord/init';
 import loggerInitialisedMessage from '../discord/utils/typeEdit';
-import type config from './data/config.json';
 import Mongo from './util/mongo';
 
 export default class Main {
@@ -56,15 +54,6 @@ export default class Main {
 
         this.client = await init(this);
         await this.mongo.connect();
-    }
-
-    get config(): typeof config {
-        return JSON.parse(fs.readFileSync('./src/main/data/config.json')
-            .toString());
-    }
-
-    set config(config) {
-        fs.writeFileSync('./src/main/data/config.json', JSON.stringify(config, null, 2));
     }
 
 }

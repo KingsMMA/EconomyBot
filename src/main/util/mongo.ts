@@ -16,7 +16,7 @@ export default class Mongo {
 
     async connect() {
         const client = await MongoClient.connect(process.env.MONGO_URI!);
-        this.mongo = client.db(this.main.config.mongo.database);
+        this.mongo = client.db('EconomyBot');
         console.info(`Connected to Database ${this.mongo.databaseName}`);
 
         console.info(`Fetching user balances for ${this.main.client.guilds.cache.size} saved guilds...`);

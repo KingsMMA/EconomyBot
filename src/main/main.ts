@@ -23,6 +23,30 @@ export default class Main {
             path: __dirname + path.sep + '..' + path.sep + '..' + path.sep + '.env',
         });
 
+        for (const required_key of ['BOT_ID', 'BOT_TOKEN', 'MONGO_URI', 'INITIAL_BALANCE', 'MESSAGE_REWARD_FORMULA', 'DAILY_MIN', 'DAILY_MAX']) {
+            if (!process.env[required_key]) {
+                throw new Error(`Missing required environment variable: ${required_key}`);
+            }
+        }
+
+        for (const required_number of ['INITIAL_BALANCE', 'DAILY_MIN', 'DAILY_MAX']) {
+            if (isNaN(Number(process.env[required_number]))) {
+                throw new Error(`Environment variable ${required_number} must be a number`);
+            }
+        }
+
+        let dailyMin = Number(process.env.DAILY_MIN);
+        let dailyMax = Number(process.env.DAILY_MAX);
+        if (dailyMin > dailyMax) {
+            throw new Error('DAILY_MIN must be less than or equal to DAILY_MAX');
+        } else if (dailyMin < 0 || dailyMax < 0) {
+            throw new Error('DAILY_MIN and DAILY_MAX must be positive numbers');
+        }
+
+        if (!/^(\d+|%length%) ?([+\-*\/] ?(\d+|%length%))+$/.test(process.env.MESSAGE_REWARD_FORMULA!)) {
+            throw new Error('MESSAGE_REWARD_FORMULA is not a valid expression and should instead match the regex /^(\\d+|%length%) ?([+\\-*\\/] ?(\\d+|%length%))+$/');
+        }
+
         this.client = await init(this);
         await this.mongo.connect();
     }

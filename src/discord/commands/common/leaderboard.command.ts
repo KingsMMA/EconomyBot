@@ -16,7 +16,7 @@ export default class LeaderboardCommand extends BaseCommand {
     }
 
     async execute(interaction: ChatInputCommandInteraction) {
-        const balances = Object.entries(this.client.serverCache[interaction.guildId!] ?? {})
+        const balances = Object.entries(this.client.serverCache[interaction.guildId!]?.userBalances ?? {})
             .sort(([, a], [, b]) => b - a)
             .slice(0, 10);
 

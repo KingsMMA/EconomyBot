@@ -54,9 +54,13 @@ export default class SetCommand extends BaseCommand {
             return;
 
         if (!this.client.serverCache[interaction.guildId!])
-            this.client.serverCache[interaction.guildId!] = {};
+            this.client.serverCache[interaction.guildId!] = {
+                guildId: interaction.guildId!,
+                userBalances: {},
+                dailiesCollectedAt: {},
+            };
 
-        this.client.serverCache[interaction.guildId!][user.id] = amount;
+        this.client.serverCache[interaction.guildId!].userBalances[user.id] = amount;
 
         await modalInt.replySuccess(`You have successfully set ${user.toString()} (${user.username})'s balance to $${amount.formatNumber()}.`);
     }

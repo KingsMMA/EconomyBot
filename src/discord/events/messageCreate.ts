@@ -20,14 +20,18 @@ export default class {
         if (!reward) return;
 
         if (!this.client.serverCache[message.guild.id]) {
-            this.client.serverCache[message.guild.id] = {};
+            this.client.serverCache[message.guild.id] = {
+                guildId: message.guild.id,
+                userBalances: {},
+                dailiesCollectedAt: {},
+            };
         }
 
-        if (!this.client.serverCache[message.guild.id][message.author.id]) {
-            this.client.serverCache[message.guild.id][message.author.id] = Number(process.env.INITIAL_BALANCE);
+        if (!this.client.serverCache[message.guild.id].userBalances[message.author.id]) {
+            this.client.serverCache[message.guild.id].userBalances[message.author.id] = Number(process.env.INITIAL_BALANCE);
         }
 
-        this.client.serverCache[message.guild.id][message.author.id] += reward;
+        this.client.serverCache[message.guild.id].userBalances[message.author.id] += reward;
     }
 
 }

@@ -46,14 +46,18 @@ export default class PayCommand extends BaseCommand {
             return;
 
         if (!this.client.serverCache[interaction.guildId!])
-            this.client.serverCache[interaction.guildId!] = {};
+            this.client.serverCache[interaction.guildId!] = {
+                guildId: interaction.guildId!,
+                userBalances: {},
+                dailiesCollectedAt: {},
+            };
 
         balance = this.client.getBalance(interaction.guildId!, interaction.user.id);
         if (balance < amount)
             return interaction.replyError('You do not have enough money to pay that amount.');
 
-        this.client.serverCache[interaction.guildId!][interaction.user.id] = balance - amount;
-        this.client.serverCache[interaction.guildId!][user.id] = this.client.getBalance(interaction.guildId!, user.id) + amount;
+        this.client.serverCache[interaction.guildId!].userBalances[interaction.user.id] = balance - amount;
+        this.client.serverCache[interaction.guildId!].userBalances[user.id] = this.client.getBalance(interaction.guildId!, user.id) + amount;
 
         await interaction.replySuccess(`You have successfully paid ${user.toString()} (${user.username}) $${amount.formatNumber()}.`);
     }

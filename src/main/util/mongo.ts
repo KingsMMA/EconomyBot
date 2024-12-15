@@ -26,25 +26,25 @@ export default class Mongo {
         setInterval(() => this.saveAllUserBalances(this.main.client.serverCache), 1000 * Number(process.env.AUTOSAVE_INTERVAL));
     }
 
-    async fetchAllUserBalances(): Promise<Record<Snowflake, UserBalances>> {
+    async fetchAllUserBalances(): Promise<Record<Snowflake, ServerData>> {
         return Object.fromEntries(
             (await this.mongo
-                .collection('balances')
+                .collection('servers')
                 .find()
                 .toArray())
-                .map(({ guildId, userBalances }) => [
-                    guildId, userBalances
+                .map((data) => [
+                    data.guildId, data
                 ]));
     }
 
-    async saveAllUserBalances(data: Record<Snowflake, UserBalances>) {
+    async saveAllUserBalances(data: Record<Snowflake, ServerData>) {
         await Promise.all(
             Object.entries(data)
                 .map(([
-                    guildId, userBalances
+                    guildId, serverData
                 ]) => this.mongo
-                    .collection('balances')
-                    .updateOne({ guildId }, { $set: { userBalances } }, { upsert: true })));
+                    .collection('servers')
+                    .updateOne({ guildId }, { $set: serverData }, { upsert: true })));
     }
 
 }

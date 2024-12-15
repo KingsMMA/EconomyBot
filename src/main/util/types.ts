@@ -5,5 +5,6 @@ export type UserBalances = Record<Snowflake, number>;
 export interface ServerData {
     guildId: Snowflake;
     userBalances: UserBalances;
+    dailiesCollectedAt: Record<Snowflake, number>;
 }
 

@@ -3,7 +3,7 @@ import type { Db } from 'mongodb';
 import { MongoClient } from 'mongodb';
 
 import type Main from '../main';
-import type { ServerConfig, ServerData } from './types';
+import type { ServerData } from './types';
 
 export default class Mongo {
 
@@ -18,24 +18,6 @@ export default class Mongo {
         const client = await MongoClient.connect(process.env.MONGO_URI!);
         this.mongo = client.db(this.main.config.mongo.database);
         console.info(`Connected to Database ${this.mongo.databaseName}`);
-    }
-
-    async fetchServerConfig(guildId: Snowflake): Promise<ServerConfig> {
-        return await this.mongo
-            .collection('config')
-            .findOne({ guildId }) as ServerConfig | null ?? {
-            guildId,
-            initialBalance: 0,
-            messageRewardFormula: '0',
-            dailyMin: 0,
-            dailyMax: 0
-        };
-    }
-
-    async saveServerConfig(data: ServerConfig) {
-        await this.mongo
-            .collection('config')
-            .updateOne({ guildId: data.guildId }, { $set: data }, { upsert: true });
     }
 
     async fetchUserBalances(guildId: Snowflake): Promise<ServerData> {

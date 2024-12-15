@@ -1,16 +1,27 @@
 import chalk from 'chalk';
-import type { InteractionResponse, Message, PermissionResolvable } from 'discord.js';
+import {
+    ActionRowBuilder, ButtonBuilder,
+    InteractionReplyOptions,
+    InteractionResponse,
+    Message,
+    MessageCreateOptions,
+    MessagePayload,
+    PermissionResolvable
+} from 'discord.js';
 import { ButtonInteraction } from 'discord.js';
 import { CommandInteraction } from 'discord.js';
 
 import KingsDevEmbedBuilder from './kingsDevEmbedBuilder';
+import {ButtonStyle, ComponentType} from "discord-api-types/v10";
 
 const loggerInitialisedMessage = 'Logger initialised';
 
 declare module 'discord.js' {
     interface CommandInteraction {
+        safeReply(options: string | MessagePayload | InteractionReplyOptions): Promise<Message | InteractionResponse>;
         replySuccess(message: string, ephemeral?: boolean): Promise<Message | InteractionResponse>;
         replyError(message: string, ephemeral?: boolean): Promise<Message | InteractionResponse>;
+        replyConfirmation(message: string, ephemeral?: boolean): Promise<boolean>;
 
         /**
          * Checks if the user has the required permissions to run the command (or admin).
@@ -21,8 +32,10 @@ declare module 'discord.js' {
         permCheck(permission: PermissionResolvable, error?: string): boolean;
     }
     interface ButtonInteraction {
+        safeReply(options: string | MessagePayload | InteractionReplyOptions): Promise<Message | InteractionResponse>;
         replySuccess(message: string, ephemeral?: boolean): Promise<Message | InteractionResponse>;
         replyError(message: string, ephemeral?: boolean): Promise<Message | InteractionResponse>;
+        replyConfirmation(message: string, ephemeral?: boolean): Promise<boolean>;
     }
 }
 
@@ -53,18 +66,15 @@ declare global {
     }
 }
 
-CommandInteraction.prototype.replySuccess = ButtonInteraction.prototype.replySuccess = async function (message: string, ephemeral?: boolean) {
+CommandInteraction.prototype.safeReply = ButtonInteraction.prototype.safeReply = async function (options: string | MessagePayload | InteractionReplyOptions) {
     if (this.replied || !this.isRepliable() || this.deferred)
-        return this.editReply({
-            embeds: [
-                new KingsDevEmbedBuilder()
-                    .setColor('Green')
-                    .setTitle('Success')
-                    .setDescription(message)
-            ],
-        });
+        return this.editReply(options);
     else
-        return this.reply({
+        return this.reply(options);
+}
+
+CommandInteraction.prototype.replySuccess = ButtonInteraction.prototype.replySuccess = async function (message: string, ephemeral?: boolean) {
+    return this.safeReply({
             ephemeral: ephemeral,
             embeds: [
                 new KingsDevEmbedBuilder()
@@ -76,26 +86,89 @@ CommandInteraction.prototype.replySuccess = ButtonInteraction.prototype.replySuc
 };
 
 CommandInteraction.prototype.replyError = ButtonInteraction.prototype.replyError = async function (message: string, ephemeral?: boolean) {
-    if (this.replied || !this.isRepliable() || this.deferred)
-        return this.editReply({
-            embeds: [
-                new KingsDevEmbedBuilder()
-                    .setColor('Red')
-                    .setTitle('Error')
-                    .setDescription(message)
-            ],
-        });
-    else
-        return this.reply({
+    return this.safeReply({
+        ephemeral: ephemeral,
+        embeds: [
+            new KingsDevEmbedBuilder()
+                .setColor('Red')
+                .setTitle('Error')
+                .setDescription(message)
+        ],
+    });
+};
+
+CommandInteraction.prototype.replyConfirmation = ButtonInteraction.prototype.replyConfirmation = async function (message: string, ephemeral?: boolean): Promise<boolean> {
+    return new Promise<boolean>(async (resolve, reject) => {
+        let repsonse = await this.safeReply({
             ephemeral: ephemeral,
             embeds: [
                 new KingsDevEmbedBuilder()
-                    .setColor('Red')
-                    .setTitle('Error')
+                    .setColor('Yellow')
+                    .setTitle('Are you sure?')
                     .setDescription(message)
             ],
+            components: [
+                new ActionRowBuilder<ButtonBuilder>()
+                    .addComponents([
+                        new ButtonBuilder()
+                            .setCustomId('confirm')
+                            .setLabel('Confirm')
+                            .setStyle(ButtonStyle.Success),
+                        new ButtonBuilder()
+                            .setCustomId('cancel')
+                            .setLabel('Cancel')
+                            .setStyle(ButtonStyle.Danger)
+                    ])
+            ]
         });
-};
+
+        let buttonInt = await repsonse.awaitMessageComponent({
+            componentType: ComponentType.Button,
+            time: 60000,
+            filter: i => i.user.id === this.user.id &&
+                (i.customId === 'confirm' || i.customId === 'cancel')
+        })
+            .catch(() => {
+                this.editReply({
+                    embeds: [
+                        new KingsDevEmbedBuilder()
+                            .setColor('Red')
+                            .setTitle('Timed out.')
+                            .setDescription('This timed out.  Please try again.')
+                    ],
+                    components: []
+                });
+                resolve(false);
+            });
+
+        if (!buttonInt) return resolve(false);
+
+        await buttonInt.deferUpdate();
+        if (buttonInt.customId === 'confirm') {
+            await this.editReply({
+                embeds: [
+                    new KingsDevEmbedBuilder()
+                        .setColor('Green')
+                        .setTitle('Confirmed')
+                        .setDescription('This action has been confirmed.')
+                ],
+                components: []
+            });
+            resolve(true);
+        } else if (buttonInt.customId === 'cancel') {
+            await this.editReply({
+                embeds: [
+                    new KingsDevEmbedBuilder()
+                        .setColor('Red')
+                        .setTitle('Cancelled')
+                        .setDescription('This action has been cancelled.')
+                ],
+                components: []
+            });
+            resolve(false);
+        }
+    });
+}
 
 CommandInteraction.prototype.permCheck = function (permission: PermissionResolvable, error?: string) {
     if (this.member.permissions.has(permission, true)) return false;

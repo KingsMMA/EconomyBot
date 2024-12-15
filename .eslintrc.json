@@ -29,7 +29,20 @@
         "semi": ["error", "always"],
         "arrow-parens": ["error", "as-needed"],
         "quote-props": ["error", "as-needed"],
-        "object-curly-spacing": ["error", "always"]
+        "object-curly-spacing": ["error", "always"],
+        "lines-between-class-members": ["error", {
+            "enforce": [
+                { "blankLine": "always", "prev": "method", "next": "*" },
+                { "blankLine": "always", "prev": "*", "next": "method" },
+                { "blankLine": "never", "prev": "field", "next": "field" }
+            ]
+        }],
+        "padded-blocks": ["error", {
+            "classes": "always",
+            "blocks": "never",
+            "switches": "never"
+        }]
+
     },
     "plugins": ["simple-import-sort", "@typescript-eslint", "unused-imports", "prettier"],
     "parserOptions": {

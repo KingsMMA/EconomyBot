@@ -8,6 +8,7 @@ export interface CommandOptions {
     enabled: boolean;
 }
 export default abstract class BaseCommand {
+
     protected readonly command: ApplicationCommand;
     client: EconomyBot;
     opts: CommandOptions;
@@ -45,4 +46,5 @@ export default abstract class BaseCommand {
     toApplicationCommand() {
         return this.command;
     }
+
 }

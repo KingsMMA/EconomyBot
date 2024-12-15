@@ -9,6 +9,7 @@ import type config from './data/config.json';
 import Mongo from './util/mongo';
 
 export default class Main {
+
     mongo: Mongo;
     client!: EconomyBot;
 
@@ -34,4 +35,5 @@ export default class Main {
     set config(config) {
         fs.writeFileSync('./src/main/data/config.json', JSON.stringify(config, null, 2));
     }
+
 }

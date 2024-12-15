@@ -7,6 +7,7 @@ import KingsDevEmbedBuilder from '../../utils/kingsDevEmbedBuilder';
 import BaseCommand from '../base.command';
 
 export default class HelpCommand extends BaseCommand {
+
     constructor(client: EconomyBot) {
         super(client, {
             name: 'help',
@@ -107,4 +108,5 @@ export default class HelpCommand extends BaseCommand {
 
         return interaction.respond([]);
     }
+
 }

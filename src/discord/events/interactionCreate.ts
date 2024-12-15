@@ -3,7 +3,9 @@ import type { Interaction } from 'discord.js';
 import type EconomyBot from '../economyBot';
 
 export default class {
+
     client: EconomyBot;
+
     constructor(client: EconomyBot) {
         this.client = client;
     }
@@ -29,4 +31,5 @@ export default class {
             return command.autocomplete(interaction);
         }
     }
+
 }

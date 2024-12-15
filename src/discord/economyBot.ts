@@ -7,6 +7,7 @@ import type Main from '../main/main';
 import type BaseCommand from './commands/base.command';
 
 export default class EconomyBot extends Client {
+
     main: Main;
     commands: Collection<string, BaseCommand> = new Collection();
 
@@ -34,4 +35,5 @@ export default class EconomyBot extends Client {
             return `Unable to load event ${eventName}: ${e}`;
         }
     }
+
 }

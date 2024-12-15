@@ -1,14 +1,15 @@
+import type { Snowflake } from 'discord-api-types/globals';
 import type { Db } from 'mongodb';
 import { MongoClient } from 'mongodb';
 
 import type Main from '../main';
-import {ServerConfig, ServerData} from "./types";
-import {Snowflake} from "discord-api-types/globals";
+import type { ServerConfig, ServerData } from './types';
 
 export default class Mongo {
 
     private mongo!: Db;
     main: Main;
+
     constructor(main: Main) {
         this.main = main;
     }

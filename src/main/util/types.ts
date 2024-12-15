@@ -1,4 +1,4 @@
-import {Snowflake} from "discord-api-types/globals";
+import type { Snowflake } from 'discord-api-types/globals';
 
 export interface ServerConfig {
     guildId: Snowflake;

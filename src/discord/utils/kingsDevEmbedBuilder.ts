@@ -1,6 +1,7 @@
 import { EmbedBuilder } from 'discord.js';
 
 export default class KingsDevEmbedBuilder extends EmbedBuilder {
+
     constructor() {
         super();
         this.setFooter({
@@ -14,4 +15,5 @@ export default class KingsDevEmbedBuilder extends EmbedBuilder {
         super.addFields({ name, value, inline });
         return this;
     }
+
 }

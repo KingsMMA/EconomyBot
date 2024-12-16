@@ -19,7 +19,7 @@ export default class DailyCommand extends BaseCommand {
         const lastClaimed = this.client.serverCache[interaction.guildId!]?.dailiesCollectedAt[interaction.user.id] ?? 0;
         const now = Date.now();
         if (lastClaimed + 24 * 60 * 60 * 1000 > now)
-            return interaction.replyError('You have already claimed your daily reward.', true);
+            return interaction.replyError(`You have already claimed your daily reward.\nYou can claim it again ${new Date(lastClaimed + 24 * 60 * 60 * 1000).toDiscord('relative')}.`, true);
 
         const minReward = Number(process.env.DAILY_MIN);
         const maxReward = Number(process.env.DAILY_MAX);
